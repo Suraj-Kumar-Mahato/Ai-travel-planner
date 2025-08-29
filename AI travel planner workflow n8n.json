@@ -1,0 +1,301 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4f790cf2-1859-435d-8245-0348b27fbbcf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "682f04cd-8aa8-4522-969f-d1d29c16c9df",
+      "name": "Webhook",
+      "webhookId": "4f790cf2-1859-435d-8245-0348b27fbbcf"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=hey here is the travel plan.\nDestination: {{ $json.body.destination }}\n\n\ncurrent city:{{ $json.body.currentCity }}\n\n\nstartDate:{{ $json.body.startDate }}\n\n\nduration:{{ $json.body.duration }}\n\n\nbudget:{{ $json.body.budget }}\n\n\ntransportMode:{{ $json.body.transportMode }}\n\n\npeopleCount:{{ $json.body.peopleCount }}\n\n\nprefernces:{{ $json.body.preferences }}\n\n\nspecialNeeds:{{ $json.body.specialNeeds }}\n",
+        "options": {
+          "systemMessage": "=You are an expert travel planner AI agent.  \nYour job is to create a highly personalized, realistic, and budget-conscious travel itinerary.  \nAlways respond in clear, structured text (not JSON).  \n\nRequirements:  \n1. Start with a **Trip Summary** (2–3 sentences).  \n2. Provide a **Day-wise plan** including:  \n   - Morning, Afternoon, Evening activities  \n   - Meal suggestions (local dishes, recommended restaurants)  \n   - Tips (local travel advice, packing reminders, money-saving hacks)  \n3. Add **General Travel Tips** (3–5 bullet points).  \n4. Provide a **Packing List** tailored to the destination and season.  \n5. At the end, include the provided **Email** for reference.  \n\nInput Parameters:  \n- Destination: {{destination}}  \n- Current City: {{current_city}}  \n- Start Date: {{start_date}}  \n- Duration: {{duration}} days  \n- Total Budget: ₹{{budget}}  \n- Mode of Transport: {{transport_mode}}  \n- Number of Travelers: {{people_count}}  \n- Preferences: {{preferences}}  \n- Special Needs: {{special_needs}}  \n- Email: {{email}}  \n\nGuidelines:  \n- Keep the plan realistic for the budget and trip length.  \n- Recommend a mix of **famous attractions** and **hidden gems**.  \n- Adjust pacing for families, elderly travelers, or special needs.  \n- Keep the tone **friendly, inspiring, and professional**.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3c69174e-9162-4448-8720-4b220b6f06cb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        208
+      ],
+      "id": "7efbf91f-038a-46b3-9e9a-8f1df401e908",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "qh4gEkEw30owtXN7",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "Travel Confirmation",
+        "emailType": "text",
+        "message": "=hey here is the travel plan.\nDestination: {{ $('Webhook').item.json.body.destination }}\n\n\ncurrent city:{{ $('Webhook').item.json.body.currentCity }}\n\n\nstartDate:{{ $('Webhook').item.json.body.startDate }}\n\n\nduration:{{ $('Webhook').item.json.body.duration }}\n\n\nbudget:{{ $('Webhook').item.json.body.budget }}\n\n\ntransportMode:{{ $('Webhook').item.json.body.transportMode }}\n\n\npeopleCount:{{ $('Webhook').item.json.body.peopleCount }}\n\n\nprefernces:{{ $('Webhook').item.json.body.preferences }}\n\n\nspecialNeeds:{{ $('Webhook').item.json.body.specialNeeds }}\n\n{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "d26040a3-7b78-49e9-8df1-c9371c12ec71",
+      "name": "Send a message",
+      "webhookId": "e1cce831-68be-4410-9b8a-6fba037ca0c1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eP7XRDaDdVRUgJCo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1AYAzXv1uqpO32Z6D3dxHi3UihqnYWKwoJX6S7O1cdws",
+          "mode": "list",
+          "cachedResultName": "Travel planner record",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AYAzXv1uqpO32Z6D3dxHi3UihqnYWKwoJX6S7O1cdws/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AYAzXv1uqpO32Z6D3dxHi3UihqnYWKwoJX6S7O1cdws/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Destination": "={{ $('Webhook').item.json.body.destination }}",
+            "current city": "={{ $('Webhook').item.json.body.currentCity }}",
+            "start date": "={{ $('Webhook').item.json.body.startDate }}",
+            "duration": "={{ $('Webhook').item.json.body.duration }}",
+            "budget": "={{ $('Webhook').item.json.body.budget }}",
+            "transportmode": "={{ $('Webhook').item.json.body.transportMode }}",
+            "peoplecount": "={{ $('Webhook').item.json.body.peopleCount }}",
+            "preferences": "={{ $('Webhook').item.json.body.preferences }}",
+            "special needs ": "={{ $('Webhook').item.json.body.specialNeeds }}",
+            "trip generated": "={{ $('AI Agent').item.json.output }}",
+            "Email": "={{ $('Webhook').item.json.body.email }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Destination",
+              "displayName": "Destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "current city",
+              "displayName": "current city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start date",
+              "displayName": "start date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transportmode",
+              "displayName": "transportmode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "peoplecount",
+              "displayName": "peoplecount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferences",
+              "displayName": "preferences",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "special needs ",
+              "displayName": "special needs ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "trip generated",
+              "displayName": "trip generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        0
+      ],
+      "id": "5e8be2a1-53a4-49ac-b054-f1720bde2eec",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "f9y6KOt74aOU9OYk",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec7890d9-4ec1-42b3-87ea-9e8696dd35a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5c61c5e0a1705130d3adac4566c32ea8e1b4aaf09991497f380b0ec81336723b"
+  },
+  "id": "TVcuD73L2V50t640",
+  "tags": []
+}
